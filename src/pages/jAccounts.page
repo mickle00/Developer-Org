@@ -1,0 +1,36 @@
+<apex:page showheader="false" standardController="Account" recordsetVar="accounts" >
+<head>
+<apex:includeScript value="{!URLFOR($Resource.jQuery, '/js/jquery-1.5.1.min.js')}"  />
+<apex:includeScript value="{!URLFOR($Resource.jQuery, '/js/jquery-ui-1.8.11.custom.min.js')}"  />
+<apex:stylesheet value="{!URLFOR($Resource.jQuery, '/css/ui-lightness/jquery-ui-1.8.11.custom.css')}"  />
+<script>
+   $j = jQuery.noConflict();
+   $j(document).ready(function() {
+    $j("#phone").dialog({ autoOpen: false, modal: true, position: 'center'  });
+   });
+   
+   function showDialog(name, phone){
+      $j("#phoneNumber").html(phone);
+      $j("#phone").dialog("open");
+      $j('#phone').dialog("option" , "title" , name);
+      $j('#phone').dialog('option', 'position', 'center');
+      return false;
+   }
+</script>
+<style>
+    .accountLink { color: blue; cursor: pointer; cursor: hand; }
+</style>
+</head>    
+  
+<body>
+
+  <apex:dataList value="{!accounts}" var="account" id="theList">
+        <a href="" class="accountLink" onclick="return showDialog('{!account.name}','{!account.Phone}')"><apex:outputText value="{!account.name}"/></a>
+  </apex:dataList>
+  
+  <div id="phone" >
+      <div style="float:left">Phone:</div><div id="phoneNumber"></div>
+  </div>
+  
+</body>
+</apex:page>

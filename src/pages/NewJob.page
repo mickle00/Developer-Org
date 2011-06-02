@@ -1,0 +1,31 @@
+<apex:page standardController="Company__c">
+
+<apex:pageBlock >
+    <apex:detail relatedList="false" />    
+</apex:pageBlock>
+
+<apex:pageBlock >
+
+    <apex:pageblockTable value="{!Company__c.Jobs__r}" var="item">
+               
+        <apex:column >
+        <apex:facet name="header">
+        <apex:outputText value="Job Name"/>
+        </apex:facet>
+        <apex:outputLink value="/{!item.Id}"> {!item.name} </apex:outputLink>
+
+        </apex:column>
+        <apex:column value="{! item.Status__c}"/> 
+        <apex:column value="{! item.Date_Applied__c}"/> 
+        <apex:column value="{! item.Close_Date__c}"/> 
+        <apex:column value="{! item.Job_Description__c}"/> 
+        <apex:column value="{! item.Job_URL__c}"/> 
+        
+        
+                
+    </apex:pageblockTable><br></br>    
+        <apex:pageBlockTable value="{!Company__c.Job_Contacts__r}" var="item">        
+        <apex:column value="{! item.name}"/>        
+    </apex:pageBlockTable>
+</apex:pageBlock>
+</apex:page>

@@ -1,0 +1,508 @@
+<apex:page showHeader="false" sidebar="false">
+
+<head> 
+
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/> 
+
+<meta name="description" content="description"/> 
+
+<meta name="keywords" content="keywords"/> 
+
+<meta name="author" content="author"/> 
+
+<style type="text/css">
+
+/*#############################################################
+Name: Coffee N Cream
+Date: 2006-08-24
+Description: A smooth coffee style template.
+Author: Viktor Persson
+URL: http://templates.arcsin.se
+
+Feel free to use and modify but please provide credits.
+#############################################################*/
+
+/* standard elements */
+* {
+    margin: 0;
+    padding: 0;
+}
+a {
+    color: #963;
+}
+a:hover {
+    color: #C60;
+}
+body {
+    background: #655A46 url(http://salesforce.michaelpatrickstewart.com/img/bg.gif);
+    color: #543;
+    font: normal 62.5% "Lucida Sans Unicode",sans-serif;
+}
+input {
+    color: #555;
+    font: normal 1.1em "Lucida Sans Unicode",sans-serif;
+}
+p,cite,code,ul {
+    font-size: 1.2em;
+    padding-bottom: 1.2em;
+}
+h1 {
+    font-size: 1.4em;
+    margin-bottom: 4px;
+}
+code {
+    background: #FFE;
+    border: 1px solid #EED;
+    border-left: 6px solid #938262;
+    color: #554;
+    display: block;
+    font: normal 1.1em "Lucida Sans Unicode",serif;
+    margin-bottom: 12px;
+    padding: 8px 10px;
+    white-space: pre;
+}
+blockquote {
+    background: url(http://salesforce.michaelpatrickstewart.com/img/quote.gif) no-repeat;
+    color: #666;
+    display: block;
+    font: normal 1.3em "Lucida Sans Unicode",serif;
+    padding-left: 28px;
+}
+h1,h2,h3 {
+    color: #654;
+    padding-top: 6px;
+}
+
+/* misc */
+.clearer {
+    clear: both;
+}
+
+/* structure */
+.container {
+    background: url(http://salesforce.michaelpatrickstewart.com/img/bgcontainer.gif) repeat-y;
+    margin: 0 auto;
+    width: 780px;
+}
+
+/* header */
+.header {
+    background: url(http://salesforce.michaelpatrickstewart.com/img/bgheader.gif) repeat-x;
+    height: 120px;
+    margin: 0 auto;
+    width: 760px;
+}
+
+/* title */
+.title {
+    padding: 32px;
+}
+.title h1 {
+    color: #E4DBCF;
+    font: normal 3.4em "Lucida Sans Unicode","Trebuchet MS",sans-serif;
+}
+
+/* navigation */
+.navigation {
+    background: #FFF url(http://salesforce.michaelpatrickstewart.com/img/bgnavigation.gif) repeat-x;
+    font: bold 1.2em Verdana,sans-serif;
+    height: 44px;
+    margin: 0 auto;
+    padding: 0 18px;
+    width: 725px;
+}
+.navigation a {
+    color: #543;
+    text-decoration: none;
+    padding: 3px 4px;
+    margin-right: 12px;
+    line-height: 44px;
+}
+.navigation a:hover {
+    background: #CEBDA1;
+    color: #420;
+}
+
+/* main */
+.main {
+    clear: both;
+    padding: 0 10px 12px 28px;
+}
+
+/* sub navigation */
+.sidenav {
+    float: right;
+    width: 218px;
+}
+.sidenav h1 {
+    background: #BCB39F url(http://salesforce.michaelpatrickstewart.com/img/sidenavh1.gif) repeat-x;
+    border-bottom: 1px solid #999;
+    border-top: 1px solid #CCC;
+    color: #4A4A44;
+    font-size: 1.2em;
+    height: 22px;
+    margin: 0;
+    padding-left: 12px;
+}
+.sidenav ul {
+    margin: 0;
+    padding: 0;
+}
+.sidenav li {
+    border-bottom: 1px solid #A98;
+    border-top: 1px solid #DDC;
+    list-style: none;
+}
+.sidenav li a {
+    background: #CCC3AF;
+    color: #554;
+    display: block;
+    padding: 8px 4px 8px 12px;
+    text-decoration: none;
+}
+.sidenav li a:hover {
+    background: #D6CCB9;
+    color: #654;
+}
+
+/* content */
+.content {
+    padding-top: 12px;
+    float: left;
+    width: 68%;
+}
+.content .descr {
+    color: #987E57;
+    font-size: 1.1em;
+    margin-bottom: 6px;
+}
+.content li {
+    list-style: url(http://salesforce.michaelpatrickstewart.com/img/li.gif);
+    margin-left: 18px;
+}
+
+/* footer */
+.footer {
+    background: #958463 url(http://salesforce.michaelpatrickstewart.com/img/bgfooter.gif) repeat-x;
+    color: #FED;
+    font-size: 1.1em;
+    line-height: 40px;
+    margin: 0 auto;
+    text-align: center;
+    width: 760px;
+}
+.footer a {
+    color: #FFD;
+    text-decoration: none;
+}
+.footer a:hover {
+    color: #FFF;
+    text-decoration: underline;
+}
+</style>
+
+<title>Salesforce.com Consulting</title> 
+
+</head> 
+
+<body> 
+
+ 
+
+<div class="container"> 
+
+ 
+
+    <div class="header"> 
+
+                
+
+        <div class="title"> 
+
+            <!-- <h1 align="center">Salesforce.com Consulting</h1> -->
+            <center><img src="http://www.developerforce.com/assets/images/discussions/banner.gif" width= "100%" alt="Angry face" /></center>
+
+        </div> 
+
+ 
+
+    </div> 
+
+ 
+
+    <div class="navigation"> 
+
+            <a href="index.html">Home</a> 
+
+            <a href="aboutme.html">About Me</a> 
+
+            <a href="services.html">Services</a> 
+
+            <a href="meeting.html">Request a Meeting</a> 
+
+            <a href="contact.html">Contact Info</a> 
+
+            <div class="clearer"><span></span></div> 
+
+        </div> 
+
+ 
+
+    <div class="main">      
+
+        
+
+        <div class="content"> 
+
+ 
+
+            <font size="5"><u>Request a free consultation!</u></font> 
+
+            <!--<div class="descr">Jun 13, 2006 by Vulputate</div>--> 
+
+ 
+
+            <p><br></br>If you are interested in utilizing my services, please fill out the contact sheet below. Currently, rates are $13.7 bajillion dollars per hour.</p> 
+
+ 
+
+            <blockquote><p>Perfect for any business, big or small! - Abraham Lincoln</p></blockquote> 
+
+            
+
+                    <p> </p>
+
+                    
+
+<IMG SRC="http://salesforce.michaelpatrickstewart.com/salesforce_logos.jpg" WIDTH="250" HEIGHT="200" ALIGN="left"> </img>
+
+
+
+<FORM NAME="joe" id="joe"> 
+
+<INPUT TYPE="hidden" NAME="burns" id="burns" SIZE="35"> </input>
+
+</form> 
+
+
+
+<form name="zork" action="https://www.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8" method="POST"> 
+
+ 
+
+<input type="hidden" name="oid" value="00D50000000Ipjv"> </input>
+
+<input type="hidden" name="retURL" value="http://salesforce.michaelpatrickstewart.com/thanks.html"> </input>
+
+<p ALIGN="RIGHT"> 
+
+<FONT style="line-height:200%"> 
+
+<label for="first_name">First Name: </label><input  id="first_name" maxlength="40" name="first_name" size="15" type="text" /><br></br> 
+
+ 
+
+<label for="last_name">Last Name: </label><input  id="last_name" maxlength="80" name="last_name" size="15" type="text" /><br></br> 
+
+ 
+
+<label for="company">Company: </label><input  id="company" maxlength="40" name="company" size="15" type="text" /><br></br> 
+
+<label for="street">Address: </label><input  id="street" maxlength="40" name="street" size="15" type="text" /><br></br> 
+
+<label for="city">City: </label><input  id="city" maxlength="40" name="city" size="15" type="text" /><br></br> 
+
+ 
+
+<label for="state">State: </label><input  id="state" maxlength="20" name="state" size="15" type="text" /><br></br> 
+
+ 
+
+<label for="phone">Phone: </label><input  id="phone" maxlength="40" name="phone" size="15" type="text" /><br></br> 
+
+ 
+
+<label for="mobile">Mobile: </label><input  id="mobile" maxlength="40" name="mobile" size="15" type="text" /><br></br> 
+
+ 
+
+<label for="email">Email: </label><input  id="email" maxlength="80" name="email" size="15" type="text" /><br></br> 
+
+ 
+
+Preferred Contact Method: <select  id="00N50000001wxHK" name="00N50000001wxHK" title="Preferred Method of Contact"><option value="">--None--</option><option value="Email">Email</option> 
+
+<option value="Phone">Phone</option> 
+
+<option value="Mobile">Mobile</option> 
+
+</select><br></br> 
+
+ 
+
+<input type="hidden" name="Campaign_ID" value="70150000000An2v"> </input>
+
+<br></br> 
+
+</font> 
+
+<input type="submit" name="submit" VALUE="Please contact me with more info!"> </input>
+
+ 
+
+</p> 
+
+</form> 
+
+
+
+
+
+
+
+<p align="center">Michael Stewart will be contacting you within 48 hours.</p> 
+
+ 
+
+        </div> 
+
+ 
+
+        <div class="sidenav"> 
+
+ 
+
+            <h1>Favorite Links</h1> 
+
+            <ul> 
+
+                <li><a href="http://www.salesforce.com">Salesforce.com</a></li> 
+
+                <li><a href="http://www.wikipedia.org/">Wiki</a></li> 
+
+                <li><a href="http://www.cnn.com">CNN</a></li> 
+
+                <li><a href="http://www.reddit.com">Reddit</a></li> 
+
+            </ul> 
+
+ 
+
+            <h1>About Me</h1> 
+
+            <ul> 
+
+                <li><a href="http://www.facebook.com/michaelpatrickstewart">Facebook</a></li> 
+
+                <li><a href="http://www.linkedin.com">LinkedIn</a></li> 
+
+                <li><a href="http://www.twitter.com/mickle00">Twitter</a></li> 
+
+                <li><a href="http://www.michaelpatrickstewart.com/salesforce/index.html">Home Page</a></li> 
+
+            </ul> 
+
+ 
+
+            <!--<h1>Third and last</h1>
+
+            <ul>
+
+                <li><a href="index.html">sociis natoque</a></li>
+
+                <li><a href="index.html">magna sed purus</a></li>
+
+                <li><a href="index.html">tincidunt</a></li>
+
+                <li><a href="index.html">consequat molestie</a></li>
+
+            </ul>
+
+--> 
+
+        </div> 
+
+ 
+
+        <div class="clearer"><span></span></div> 
+
+ 
+
+    </div> 
+
+ 
+
+    <div class="footer">&copy; 2010 <a href="index.html">michaelpatrickstewart.com</a>. Valid <a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> &amp; <a href="http://validator.w3.org/check?uri=referer">XHTML</a>. Template design by <a href="http://templates.arcsin.se">Arcsin</a> 
+
+    </div> 
+
+ 
+
+</div> 
+
+ 
+
+</body> 
+
+
+<SCRIPT LANGUAGE="javascript">
+
+if(window.location == 'mikescloud.info/jens'){
+var text = ""
+}
+
+else{
+
+var locate = window.location
+document.joe.burns.value = locate
+var text = document.joe.burns.value
+}
+
+function delineate(str){
+theleft = str.indexOf("city=") + 5;
+theright = str.indexOf("&st=");
+return(str.substring(theleft, theright));
+}
+
+function delineate2(str){
+theleft = str.indexOf("st=") + 3;
+theright = str.indexOf("&fname=");
+return(str.substring(theleft, theright));
+}
+
+function delineate3(str){
+theleft = str.indexOf("fname=") + 6;
+theright = str.indexOf("&lname=");
+return(str.substring(theleft, theright));
+}
+
+function delineate4(str){
+theleft = str.indexOf("lname=") + 6;
+theright = str.lastIndexOf("&");
+return(str.substring(theleft, str.length));
+}
+
+</script> 
+
+<SCRIPT LANGUAGE="javascript"> 
+var zippy = delineate(text)
+document.zork.city.value = unescape(zippy) 
+</script> 
+
+<SCRIPT LANGUAGE="javascript"> 
+var zippy2 = delineate2(text)
+document.zork.state.value = unescape(zippy2) 
+</script> 
+
+<SCRIPT LANGUAGE="javascript"> 
+var zippy3 = delineate3(text)
+document.zork.first_name.value = unescape(zippy3) 
+</script> 
+
+<SCRIPT LANGUAGE="javascript"> 
+var zippy4 = delineate4(text)
+document.zork.last_name.value = unescape(zippy4) 
+</script> 
+
+
+</apex:page>

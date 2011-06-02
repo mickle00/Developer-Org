@@ -1,0 +1,4 @@
+<apex:page standardController="Idea">
+
+<apex:detail />
+</apex:page>

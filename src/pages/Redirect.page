@@ -1,0 +1,4 @@
+<!-- Page: Redirect -->
+<apex:page controller="RedirectController" action="{!redirect}">
+  This page is used for page redirections. If you are seeing this message, it means the link was incorrectly configured. Please contact your administrator.
+</apex:page>

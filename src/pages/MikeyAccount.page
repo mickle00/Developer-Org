@@ -1,0 +1,18 @@
+<apex:page controller="MikeyController" tabStyle="Account">
+    <apex:form >
+        <apex:pageBlock title="Hello {!$User.FirstName}!">
+            You are viewing the {!account.name} account. <p/>
+            Change Account Name: <p/> 
+            <apex:inputField value="{!account.name}"/> <p/>
+            
+            <apex:commandButton action="{!save}" value="Save New Account Name"/><br></br><br></br>
+            
+            <apex:pageBlockTable value="{!opportunities}" var="o">
+            <apex:column value="{!o.name}"/>
+            <apex:column value="{!o.closedate}"/>
+        </apex:pageBlockTable>
+        </apex:pageBlock>
+
+        
+    </apex:form>
+</apex:page>

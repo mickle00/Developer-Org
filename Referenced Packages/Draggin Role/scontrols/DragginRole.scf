@@ -1,0 +1,1785 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+
+<link  href="/dCSS/Theme2/default/common.css" type="text/css" media="handheld,print,projection,screen,tty,tv" rel="stylesheet" ><link  href="/dCSS/Theme2/default/custom.css" type="text/css" media="handheld,print,projection,screen,tty,tv" rel="stylesheet" ><link  href="/dCSS/Theme2/default/setup.css" type="text/css" media="handheld,print,projection,screen,tty,tv" rel="stylesheet" ><link  href="/css/assistive.css" type="text/css" media="aural,braille,embossed" rel="stylesheet" >
+
+<style type="text/css">
+	table td { position:relative }
+	.handle { position:relative }
+</style>
+
+<style>
+	<!--
+	.drag{position:absolute; top: 1px; left: 3px; cursor:pointer}
+	.dragfire{position:absolute; top: -7px; left: 3px; cursor:pointer}
+	.drag2{position:absolute; top: -1px; left: 5px; cursor:pointer}
+        .titlebar{background:rgb(137,182,46); height:40px; font-size:11pt}
+	.feedback{font-family:verdana; font-size:10pt}
+	.plug {font-family:verdana; font-size:8pt}
+	.stable {position:relative}
+	.coolmenu{position:absolute; visibility:hidden; top:40px; background:rgb(150,150,150); padding-top:15px; padding-right:15px; padding-bottom:15px; padding-left:15px; width:175px; line-height:16pt; border-bottom:medium solid rgb(137,182,46); border-left:medium solid rgb(137,182,46); border-right:medium solid rgb(137,182,46)}
+	.coolmenu a{color:white; font-family:arial; font-size:10pt; cursor:pointer}
+	-->
+</style>
+
+<style type="text/css">
+html {
+overflow: auto;
+}
+</style>
+
+
+</head>
+<body>
+
+<script src="/soap/ajax/8.0/connection.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+
+/*************************************************************************************
+  DEFINE GLOBAL VARIABLES
+*************************************************************************************/
+
+// General Variables
+
+var htmlstring = "";
+var nullvar = null;
+var IE=(navigator.appName=="Microsoft Internet Explorer")?true:false
+var TempQuery;
+var itarget;
+var sideguy;
+var popup=null;
+var noresize=0;
+
+// User Record Related Variables
+
+var ia;    			// Active=0, Inactive=1, Both=2
+var fieldcount = 0;		// Stores number of user fields in org
+var dispfieldcount;		// Number of currently chosen fields
+var dispfields = new Array;
+var lastfields = new Array;
+var newfields = new Array;
+var querystring = "";
+var fieldlist = new Array;
+var userDescription;
+var userDescriptionFields;
+var qorder="";
+var qdir="ASC";
+
+// Role Related Variables
+
+var toprole;
+var showroledescription;
+var confirmdnd;
+var nodelist = null;
+var tablelist;
+var openroles = new Array;
+var unassshow=0;
+
+// Drag and Drop Variables
+
+var tempY;
+var currentdropid, lastdropid, tempobjectid, originaldropid;
+
+
+sforce.connection.batchSize=500;
+
+/*************************************************************************************
+  DEFINE OBJECTS
+*************************************************************************************/
+
+
+function Node(id, Name, ParentRoleId, RollupDescription, level){
+	this.id=id;
+	this.Name=Name;
+	this.ParentRoleId=ParentRoleId;
+	this.RollupDescription=RollupDescription;
+	this.level=level;
+	this.flag=0;
+}
+
+function Field(name, label, type){
+	this.name=name;
+	this.label=label;
+	this.type=type;
+}
+
+
+/*************************************************************************************
+  DEFINE FUNCTIONS
+*************************************************************************************/
+
+function ShowHideUsers(tbodyid,index){
+
+	var UserQuery = new Array(), UserQueryRecords = new Array();
+	var t=1;
+
+	var gotime=0;
+
+	if(tbodyid=="" && unassshow==0){
+		gotime=1;
+	}
+	else if(tbodyid!=""){
+		if(nodelist[index].flag==0)
+			gotime=1;
+	}
+
+	if(gotime==1){
+
+		var tempq= querystring + "userRoleId = \'" + tbodyid + "\'";
+		if(qorder!="")
+			tempq += " ORDER BY " + qorder + " " + qdir;
+
+		try{
+			UserQuery[0] = sforce.connection.query(tempq);
+		}
+		catch(error){
+			alert("An error has occured while querying User table: \n\n" + error);
+			return;
+		}
+
+		if(UserQuery[0].size==0){
+			if(tbodyid!="")
+				var theTable = document.getElementById(tbodyid);
+			else
+				var theTable = document.getElementById("unassigned");
+
+			var newr=theTable.insertRow(theTable.rows.length);
+			var newd=newr.insertCell(newr.cells.length);
+			if(ia==0){
+				newd.innerHTML="<i>No Active Users Assigned</i>";
+			}
+			else if(ia==1){
+				newd.innerHTML="<i>No Inactive Users Assigned</i>";
+			}
+			else{
+				newd.innerHTML="<i>No Active or Inactive Users Assigned</i>";
+			}
+			var newd=newr.insertCell(newr.cells.length);
+
+			if(tbodyid!="")
+				nodelist[index].flag++;
+			else
+				unassshow++;
+		}
+		else{
+			if(tbodyid!="")
+				var theTable = document.getElementById(tbodyid);
+			else
+				var theTable = document.getElementById("unassigned");
+
+
+			if(theTable!=null){
+
+				UserQueryRecords[0] = new Array;
+				UserQueryRecords[0] = UserQuery[0].getArray("records");
+
+				while(UserQuery[t-1].done=="false"){
+					UserQuery[t]=sforce.connection.queryMore(UserQuery[t-1].queryLocator);
+					UserQueryRecords[t] = new Array;
+					UserQueryRecords[t] = UserQuery[t].getArray("records");
+					t++;
+				}
+
+				for(var p=0;p<t;p++){
+					for(var n=0;n<UserQueryRecords[p].length;n++){
+
+						var newr=theTable.insertRow(theTable.rows.length);
+						var newd=newr.insertCell(newr.cells.length);
+
+						newd.width=16;
+						if(IE){
+							newd.innerHTML="<div class=\"stable\"><img src=\"/servlet/servlet.FileDownload?file=015300000007Pyr\" class=\"drag\" id=\"" + UserQueryRecords[p][n].get("Id") + "user\" onmousedown=\'drag(\"user\", \"" + UserQueryRecords[p][n].get("Id") + "\", this, event);\'></div>";
+						}
+						else{	
+							newd.innerHTML="<div class=\"stable\"><img src=\"/servlet/servlet.FileDownload?file=015300000007Pyr\" class=\"dragfire\" id=\"" + UserQueryRecords[p][n].get("Id") + "user\" onmousedown=\'drag(\"user\", \"" + UserQueryRecords[p][n].get("Id") + "\", this, event);\'></div>";
+						}
+
+						var newd=newr.insertCell(newr.cells.length);
+						newd.innerHTML="<a href=\"/" + UserQueryRecords[p][n].get("Id").substring(0,15) + "\" target=\"_blank\"><font style=\"color:rgb(137,182,46)\">view</font></a>&nbsp;&nbsp;<a href=\"/" + UserQueryRecords[p][n].get("Id").substring(0,15) + "/e?retURL=%2F" + UserQueryRecords[p][n].get("Id").substring(0,15) + "\" target=\"_blank\"><font style=\"color:rgb(137,182,46)\">edit</font></a>&nbsp;&nbsp;";
+
+						for(var e=0;e<dispfieldcount;e++){
+
+							if(dispfields[e]=='ProfileId'){
+								var newd=newr.insertCell(newr.cells.length);
+								try{
+									TempQuery=sforce.connection.retrieve("Name","Profile",[UserQueryRecords[p][n].get(dispfields[e])]);
+								}
+								catch(error){
+									alert("An error has occured while querying Profile table: \n\n" + error);
+									return;
+								}
+								newd.innerHTML=TempQuery[0].get("Name");
+							}
+							else if(dispfields[e]=='LastModifiedById'){
+								var newd=newr.insertCell(newr.cells.length);
+								try{
+									TempQuery=sforce.connection.retrieve("FirstName, LastName","User",[UserQueryRecords[p][n].get(dispfields[e])]);
+								}
+								catch(error){
+									alert("An error has occured while resolving Last Modified by Id: \n\n" + error);
+									return;
+								}
+								newd.innerHTML=TempQuery[0].get("FirstName") + " " + TempQuery[0].get("LastName");
+							}
+							else if(dispfields[e]=='CreatedById'){
+								var newd=newr.insertCell(newr.cells.length);
+								try{
+									TempQuery=sforce.connection.retrieve("FirstName, LastName","User",[UserQueryRecords[p][n].get(dispfields[e])]);
+								}
+								catch(error){
+									alert("An error has occured while resolving Created by Id: \n\n" + error);
+									return;
+								}
+								newd.innerHTML=TempQuery[0].get("FirstName") + " " + TempQuery[0].get("LastName");
+							}
+							else if(dispfields[e]=='DelegatedApproverId' && UserQueryRecords[p][n].get(dispfields[e])!=null){
+								var newd=newr.insertCell(newr.cells.length);
+								try{
+									TempQuery=sforce.connection.retrieve("FirstName, LastName","User",[UserQueryRecords[p][n].get(dispfields[e])]);
+								}
+								catch(error){
+									alert("An error has occured while resolving Delegated Approver Id: \n\n" + error);
+									return;
+								}
+								newd.innerHTML=TempQuery[0].get("FirstName") + " " + TempQuery[0].get("LastName");
+							}
+							else if(dispfields[e]=='Email'){
+								var newd=newr.insertCell(newr.cells.length);
+								newd.innerHTML="<A href=\"mailto:" + UserQueryRecords[p][n].get(dispfields[e]) + "\">" + UserQueryRecords[p][n].get(dispfields[e]) + "</A>";
+							}
+							else{
+								var newd=newr.insertCell(newr.cells.length);
+								var ftype = fieldtypelookup(dispfields[e]);
+
+								if(ftype=='Boolean')
+									newd.innerHTML=UserQueryRecords[p][n].getBoolean(dispfields[e]);
+								else if(ftype=='date')
+									newd.innerHTML=UserQueryRecords[p][n].getDate(dispfields[e]);
+								else if(ftype=='datetime')
+									newd.innerHTML=UserQueryRecords[p][n].getDateTime(dispfields[e]);
+								else
+									newd.innerHTML=safeGuard(UserQueryRecords[p][n].get(dispfields[e]));
+
+								if(newd.innerHTML=="null")
+									newd.innerHTML="-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+								else if(newd.innerHTML=="")
+									newd.innerHTML="-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+							}
+						}
+
+						if(tbodyid!="")
+							nodelist[index].flag++;
+						else
+							unassshow++;
+					}
+				}
+			}
+		}
+	}
+
+	else{
+
+		if(tbodyid==""){
+			for(var m=0;m<unassshow;m++){
+				var theTable = document.getElementById("unassigned");
+				theTable.deleteRow(theTable.rows.length-1);
+			}
+
+			unassshow=0;
+		}
+		else{
+			for(var m=0;m<nodelist[index].flag;m++){
+				var theTable = document.getElementById(tbodyid);
+				theTable.deleteRow(theTable.rows.length-1);
+			}
+
+			nodelist[index].flag=0;
+		}
+	}
+
+	if(noresize!=0){
+		noresize=0;
+	}
+	else{
+		resizeframe();
+	}
+}
+
+function safeGuard(raw){
+
+	if(raw==null || raw=="")
+		return "";
+
+	var safe = "";
+	var tc;
+
+	for(var a=0; a<raw.length; a++){
+
+		tc=raw.charAt(a);
+		if(tc=="<" || tc==">" || tc=="&" || tc=="'" || tc=='"'){
+			safe+=escape(tc);
+		}
+		else{
+			safe+=tc;
+		}
+	}
+
+	return safe;
+}
+
+function Hierarchy(){
+
+	htmlstring = "&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"button\" class=\"btn\" onclick=\"javascript:kickoff();\" value=\"Refresh\">&nbsp;&nbsp;<input type=\"button\" class=\"btn\" onclick=\"javascript:optionmenu();\" value=\"Customize\">&nbsp;&nbsp;<input type=\"button\" class=\"btn\" onclick=\"javascript:exploder(toprole);\" value=\"Show All Users\">&nbsp;&nbsp;<input type=\"button\" class=\"btn\" onclick=\"javascript:imploder(toprole);\" value=\"Hide All Users\"><br><br>";
+
+	htmlstring+= "<i>Currently Displaying:&nbsp;&nbsp;</i>"
+
+	var qorderfound = 0;
+
+	for(var u=0; u<dispfieldcount; u++){
+
+		if(dispfields[u]==qorder)
+			qorderfound=1;
+
+		if(dispfields[u]=="ProfileId"){
+			if(qorder=="ProfileId"){
+				htmlstring+= "<b><a href=\'javascript: qorderback(\"" + dispfields[u] + "\");\' class=\'sorter\'>Profile</a></b>&nbsp;";
+				if(qdir=="ASC")
+					htmlstring+="<img src=\'/servlet/servlet.FileDownload?file=015300000007UnA\'>&nbsp;|&nbsp;&nbsp;";
+				else
+					htmlstring+="<img src=\'/servlet/servlet.FileDownload?file=015300000007UnF\'>&nbsp;|&nbsp;&nbsp;";
+			}
+			else
+				htmlstring+= "<a href=\'javascript: qorderback(\"" + dispfields[u] + "\");\' class=\'sorter\'>Profile</a>&nbsp;&nbsp;|&nbsp;&nbsp;";
+		}
+		else if(dispfields[u]=="LastModifiedById"){
+			if(qorder=="LastModifiedById"){
+				htmlstring+= "<b><a href=\'javascript: qorderback(\"" + dispfields[u] + "\");\' class=\'sorter\'>Last Modified By</a></b>&nbsp;";
+				if(qdir=="ASC")
+					htmlstring+="<img src=\'/servlet/servlet.FileDownload?file=015300000007UnA\'>&nbsp;|&nbsp;&nbsp;";
+				else
+					htmlstring+="<img src=\'/servlet/servlet.FileDownload?file=015300000007UnF\'>&nbsp;|&nbsp;&nbsp;";
+			}
+			else
+				htmlstring+= "<a href=\'javascript: qorderback(\"" + dispfields[u] + "\");\' class=\'sorter\'>Last Modified By</a>&nbsp;&nbsp;|&nbsp;&nbsp;";
+		}
+		else if(dispfields[u]=="CreatedById"){
+			if(qorder=="CreatedById"){
+				htmlstring+= "<b><a href=\'javascript: qorderback(\"" + dispfields[u] + "\");\' class=\'sorter\'>Created By</a></b>&nbsp;";
+				if(qdir=="ASC")
+					htmlstring+="<img src=\'/servlet/servlet.FileDownload?file=015300000007UnA\'>&nbsp;|&nbsp;&nbsp;";
+				else
+					htmlstring+="<img src=\'/servlet/servlet.FileDownload?file=015300000007UnF\'>&nbsp;|&nbsp;&nbsp;";
+			}
+			else
+				htmlstring+= "<a href=\'javascript: qorderback(\"" + dispfields[u] + "\");\' class=\'sorter\'>Created By</a>&nbsp;&nbsp;|&nbsp;&nbsp;";
+		}
+		else if(dispfields[u]=="DelegatedApproverId"){
+			if(qorder=="DelegatedApproverId"){
+				htmlstring+= "<b><a href=\'javascript: qorderback(\"" + dispfields[u] + "\");\' class=\'sorter\'>Delegated Approver</a></b>&nbsp;";
+				if(qdir=="ASC")
+					htmlstring+="<img src=\'/servlet/servlet.FileDownload?file=015300000007UnA\'>&nbsp;|&nbsp;&nbsp;";
+				else
+					htmlstring+="<img src=\'/servlet/servlet.FileDownload?file=015300000007UnF\'>&nbsp;|&nbsp;&nbsp;";
+			}
+			else
+				htmlstring+= "<a href=\'javascript: qorderback(\"" + dispfields[u] + "\");\' class=\'sorter\'>Delegated Approver</a>&nbsp;&nbsp;|&nbsp;&nbsp;";
+		}
+		else{
+			var temptype=fieldtypelookup(dispfields[u]);
+			if(temptype!='reference' && temptype!='multipicklist' && temptype!='textarea' && temptype!='boolean'){
+				if(qorder==dispfields[u])
+					htmlstring+= "<b>";
+				htmlstring+= "<a href=\'javascript: qorderback(\"" + dispfields[u] + "\");\' class=\'sorter\'>" + fieldlookup(dispfields[u]) + "</a>&nbsp;";
+				if(qorder==dispfields[u]){
+					htmlstring+= "</b>";
+					if(qdir=="ASC")
+						htmlstring+="<img src=\'/servlet/servlet.FileDownload?file=015300000007UnA\'>";
+					else
+						htmlstring+="<img src=\'/servlet/servlet.FileDownload?file=015300000007UnF\'>";
+				}
+				htmlstring+= "&nbsp;|&nbsp;&nbsp;";
+			}
+			else
+				htmlstring+= fieldlookup(dispfields[u]) + "&nbsp;&nbsp;|&nbsp;&nbsp;";
+		}
+	}
+
+	if(qorderfound==0){
+		qorder="";
+		qdir="ASC";
+	}
+
+	htmlstring+= "<br><br>";
+		
+
+	if(toprole!="All"){
+
+		for(var o=0;o<nodelist.length;o++){
+			if(nodelist[o].id==toprole){
+				break;
+				}
+		}
+		htmlstring += "<ul>" + "<table cellpadding=\"3\" valign=\"top\" id=\"" + toprole + "\"><thead><tr><td colspan=" + dispfieldcount+2 + "><A href='javascript:ShowHideUsers(\"" + toprole + "\",\"" + o + "\");'><b>"  + nodelist[o].Name + "</b></A>";
+		if(showroledescription==1){
+			if(nodelist[o].RollupDescription!=null)
+				htmlstring += "     ( " + nodelist[o].RollupDescription + " )";
+			else
+				htmlstring += "     ( - )";
+		}
+		htmlstring += "<span class=\"handle\">&nbsp;<img src=\"/servlet/servlet.FileDownload?file=015300000007PyP\" class=\"drag2\" id=\"" + toprole + "role\" onmousedown=\'drag(\"role\", \"" + toprole + "\", this, event);\'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> <a href=\"/" + nodelist[o].id.substring(0,15) + "\" target=\"_blank\"><font style=\"color:rgb(255,128,0)\">view</font></a>&nbsp;&nbsp;<a href=\"/" + nodelist[o].id.substring(0,15) + "/e?&setupid=Roles&retURL=%2F" + nodelist[o].id.substring(0,15) + "\" target=\"_blank\"><font style=\"color:rgb(255,128,0)\">edit</font></a>&nbsp;&nbsp;<a href=\"/setup/own/deleteredirect.jsp?delID=" + nodelist[o].id.substring(0,15) + "&setupid=Roles&retURL=" + escape('/servlet/servlet.FileDownload?file=015300000007Qn1') + "\" target=\"_blank\"><font style=\"color:rgb(255,128,0)\">delete</font></a>&nbsp;&nbsp;<a href=\"/00E/e?setupid=Roles&parent=" + nodelist[o].id.substring(0,15) + "\" target=\"_blank\"><font style=\"color:rgb(255,128,0)\">add</font></a></td></tr></thead><tbody><tr><td></td></tr></tbody></table>"
+
+	RoleTrace(toprole);
+	}
+	else{
+	RoleTrace(nullvar);
+	}
+
+	if(toprole!="All"){
+		htmlstring += "</ul>";
+	}
+
+htmlstring+= "<ul><table cellpadding=\"3\" valign=\"top\" id=\"unassigned\"><thead><tr><td colspan=" + dispfieldcount+2 + "><A href='javascript:ShowHideUsers(\"\",\"\");'><b><i>Unassigned Users</i></b></A></td></tr></thead><tbody><tr><td></td></tr></tbody></table></ul>";
+
+htmlstring+="<br><br>&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"button\" class=\"btn\" onclick=\"javascript:kickoff();\" value=\"Refresh\">&nbsp;&nbsp;<input type=\"button\" class=\"btn\" onclick=\"javascript:optionmenu();\" value=\"Customize\">&nbsp;&nbsp;<input type=\"button\" class=\"btn\" onclick=\"javascript:exploder(toprole);\" value=\"Show All Users\">&nbsp;&nbsp;<input type=\"button\" class=\"btn\" onclick=\"javascript:imploder(toprole);\" value=\"Hide All Users\">";
+
+	document.getElementById("content").innerHTML=htmlstring;
+
+	for(var v=0;v<nodelist.length;v++){
+		if(nodelist[v].flag>0){
+			nodelist[v].flag=0;
+			ShowHideUsers(nodelist[v].id, v);
+		}
+	}
+
+	if(unassshow>0){
+		unassshow=0;
+		ShowHideUsers("","");
+	}
+
+	resizeframe();
+	
+	init();
+	lastdropid=null;
+}
+
+
+function RoleTrace(parentid){
+
+	htmlstring += "<ul>";
+
+	for(var h=0;h<nodelist.length;h++){
+		if(nodelist[h].ParentRoleId==parentid){
+			htmlstring += "<table cellpadding=\"3\" valign=\"top\" id=\"" + nodelist[h].id + "\"><thead><tr><td colspan=" + dispfieldcount+2 + "><A href='javascript:ShowHideUsers(\"" + nodelist[h].id + "\",\"" + h + "\");'><b>"  + nodelist[h].Name + "</b></A>";
+			if(showroledescription==1){
+				if(nodelist[h].RollupDescription!=null)
+					htmlstring += "     ( " + nodelist[h].RollupDescription + " )";
+				else
+					htmlstring += "     ( - )";
+			}
+			htmlstring += "<span class=\"handle\">&nbsp;<img src=\"/servlet/servlet.FileDownload?file=015300000007PyP\" class=\"drag2\" id=\"" + nodelist[h].id + "role\" onmousedown=\'drag(\"role\", \"" + nodelist[h].id + "\", this, event);\'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> <a href=\"/" + nodelist[h].id.substring(0,15) + "\" target=\"_blank\"><font style=\"color:rgb(255,128,0)\">view</font></a>&nbsp;&nbsp;<a href=\"/" + nodelist[h].id.substring(0,15) + "/e?&setupid=Roles&retURL=%2F" + nodelist[h].id.substring(0,15) + "\" target=\"_blank\"><font style=\"color:rgb(255,128,0)\">edit</font></a>&nbsp;&nbsp;<a href=\"/setup/own/deleteredirect.jsp?delID=" + nodelist[h].id.substring(0,15) + "&setupid=Roles&retURL=" + escape('/servlet/servlet.FileDownload?file=015300000007Qn1') + "\" target=\"_blank\"><font style=\"color:rgb(255,128,0)\">delete</font></a>&nbsp;&nbsp;<a href=\"/00E/e?setupid=Roles&parent=" + nodelist[h].id.substring(0,15) + "\" target=\"_blank\"><font style=\"color:rgb(255,128,0)\">add</font></a></td></tr></thead><tbody><tr><td></td></tr></tbody></table>";
+			RoleTrace(nodelist[h].id);
+		}
+	}
+
+	htmlstring += "</ul>";
+
+	return;
+}
+
+
+function optionmenu(){
+
+	htmlstring="<div class=\"bWizardBlock tertiaryPalette\"><div class=\"pbWizardTitle tertiaryPalette\" style=\"background-color:rgb(255,128,0)\"><div class=\"ptRightTitle\">Step 1 of 2</div><h2>Step 1: Change display settings</h2></div><div class=\"pbBody\"><div class=\"pbWizardHeader\"><div class=\"pbTopButtons\" style=\"white-space: nowrap\"><input value=\" Next \"  class=\"btn\" onclick=\"javascript:onStep2();\"></div></div><div class=\"pbWizardBody\"><div class=\"columnsStep\"><div class=\"bReport\"><div class=\"selectReportColumns\"><TABLE  class=\"bPageBlock\"><TR><TD><div class=\"pbHeader categoryHeader\"><TABLE  class=\"tertiaryPalette\" style=\"background:rgb(255,128,0)\"><TR>";
+	htmlstring+="<td class=\"pbTitle\"><img src=\"/s.gif\" alt=\"\" title=\"\" width=1 height=1 class=\"minWidth\"><h3>General Settings</h3></td></tr></table></div></td></tr><tr><td>";
+
+	htmlstring+="<form name='form1' id='form1'><input type=\"checkbox\" name=\"option1\" value=\"option1\"";
+	if(showroledescription=='1')
+		htmlstring+=" checked";
+	htmlstring+="> Show 'Role name as displayed on reports'.";
+	htmlstring+="<br><br><input type=\"checkbox\" name=\"option2\" value=\"option2\"";
+	if(confirmdnd=='1')
+		htmlstring+=" checked";
+	htmlstring+="> Confirm drag and drop operations.";
+
+	htmlstring+="<br><br>Display <select id='ia' name='ia'><option value=0";
+	if(ia==0)
+		htmlstring+=" SELECTED";
+
+	htmlstring+=">Active Users</option><option value=1"
+	if(ia==1)
+		htmlstring+=" SELECTED";
+
+	htmlstring+=">Inactive Users</option><option value=2"
+	if(ia==2)
+		htmlstring+=" SELECTED";
+
+	htmlstring+=">Both</option></select>";
+
+	htmlstring+="<br><br>Top Role <select id='toprole'><option value='All'>Entire Organization</option>";
+	for(var b=0;b<nodelist.length;b++){
+		htmlstring+="<option value='" + nodelist[b].id + "'";
+		if(toprole==nodelist[b].id){
+			htmlstring+=" SELECTED";
+		}
+		htmlstring+=">" + nodelist[b].Name + "</option>";
+	}
+	htmlstring+="</select><br><br>";
+
+	htmlstring+="</form></td></tr><br><tr><td><div class=\"pbHeader categoryHeader\"><table  class=\"tertiaryPalette\" style=\"background:rgb(255,128,0)\"><tr><td class=\"pbTitle\"><img src=\"/s.gif\" alt=\"\" title=\"\" width=1 height=1 class=\"minWidth\"><h3>User Fields to Display</h3></td></tr></table></div></td></tr><tr><td>";
+	htmlstring+="<form name='form2' id='form2'><table id='userfields'><tr>";
+
+	fieldcount=0;	
+
+	for(var a=0;a<userDescription.fields.length;a++){
+
+		if(userDescription.fields[a].name=="ProfileId"){
+
+			fieldcount++;
+			htmlstring+="<td><input type=\"checkbox\" name=\"" + userDescription.fields[a].name + "\" value=\"" + fieldcount + "\"";
+
+			for(var q=0;q<dispfieldcount;q++){
+				if(dispfields[q]==userDescription.fields[a].name){
+					htmlstring+=" checked";
+				}
+			}
+
+			htmlstring+=">Profile</td>";
+
+			if((fieldcount)%3==0){
+				htmlstring+="</tr>";
+			}
+		}
+
+		else if(userDescription.fields[a].name=="CreatedById"){
+
+			fieldcount++;
+			htmlstring+="<td><input type=\"checkbox\" name=\"" + userDescription.fields[a].name + "\" value=\"" + fieldcount + "\"";
+
+			for(var q=0;q<dispfieldcount;q++){
+				if(dispfields[q]==userDescription.fields[a].name){
+					htmlstring+=" checked";
+				}
+			}
+
+			htmlstring+=">Created By</td>";
+
+			if((fieldcount)%3==0){
+				htmlstring+="</tr>";
+			}
+		}
+
+		else if(userDescription.fields[a].name=="LastModifiedById"){
+
+			fieldcount++;
+			htmlstring+="<td><input type=\"checkbox\" name=\"" + userDescription.fields[a].name + "\" value=\"" + fieldcount + "\"";
+
+			for(var q=0;q<dispfieldcount;q++){
+				if(dispfields[q]==userDescription.fields[a].name){
+					htmlstring+=" checked";
+				}
+			}
+
+			htmlstring+=">Last Modified By</td>";
+
+			if((fieldcount)%3==0){
+				htmlstring+="</tr>";
+			}
+		}
+
+		else if(userDescription.fields[a].name=="DelegatedApproverId"){
+
+			fieldcount++;
+			htmlstring+="<td><input type=\"checkbox\" name=\"" + userDescription.fields[a].name + "\" value=\"" + fieldcount + "\"";
+
+			for(var q=0;q<dispfieldcount;q++){
+				if(dispfields[q]==userDescription.fields[a].name){
+					htmlstring+=" checked";
+				}
+			}
+
+			htmlstring+=">Delegated Approver</td>";
+
+			if((fieldcount)%3==0){
+				htmlstring+="</tr>";
+			}
+		}
+
+		else if(userDescription.fields[a].label!="Role ID"){
+
+			fieldcount++;
+			htmlstring+="<td><input type=\"checkbox\" name=\"" + userDescription.fields[a].name + "\" value=\"" + fieldcount + "\"";
+
+			for(var q=0;q<dispfieldcount;q++){
+				if(dispfields[q]==userDescription.fields[a].name){
+					htmlstring+=" checked";
+				}
+			}
+
+			htmlstring+=">" + userDescription.fields[a].label + "</td>";
+
+			if((fieldcount)%3==0){
+				htmlstring+="</tr>";
+			}
+		}
+
+	}
+
+	if((fieldcount)%3!=0){
+		htmlstring+="</tr>";
+	}
+
+	htmlstring+="</table></form>";
+
+	htmlstring+="<br><br></td></tr></table></div></div></div></div><div class=\"pbWizardFooter\"><div class=\"pbBottomButtons\"><input value=\" Next \"  class=\"btn\" onclick=\"javascript:onStep2();\"></div><input value=\" Done\"  class=\"btn\" onclick=\"javascript:onGo();\"></div></div></div>";
+
+	document.getElementById("content").innerHTML=htmlstring;
+
+	resizeframe();
+
+	window.scrollTo(0,0);
+
+	return;
+}
+
+
+function onGo(){
+
+	lastdropid=null;
+	querybuild();
+	ordermem();
+	Hierarchy();
+	storeCookie();
+}
+
+function onStep2(){
+
+	lastdropid=null;
+	querybuild();
+	ordermem();
+	reorder();
+}
+
+
+
+function querybuild(){
+
+	querystring = "Select Id, ";
+	dispfieldcount = 0;
+	newfields=new Array;
+
+	if(document.form2[0].checked==true){
+		newfields[dispfieldcount]=document.form2[0].name;
+		dispfieldcount++;
+	}
+
+	for(var y=1;y<fieldcount;y++){
+		
+		if(document.form2[y].checked==true){
+			querystring+= document.form2[y].name + ", ";
+			newfields[dispfieldcount]=document.form2[y].name;
+			dispfieldcount++;
+		}
+	}
+	
+	querystring=querystring.substring(0,querystring.length-2);
+
+	toprole=document.form1.toprole.value;
+
+	if(document.form1.option1.checked==true)
+		showroledescription='1';
+	else
+		showroledescription='0';
+
+	if(document.form1.option2.checked==true)
+		confirmdnd='1';
+	else
+		confirmdnd='0';
+
+	if(document.form1.ia.value=='0'){
+		querystring += " FROM User where isActive=true AND ";
+		ia=0;
+	}
+	else if(document.form1.ia.value=='1'){
+		querystring += " FROM User where isActive=false AND ";
+		ia=1;
+	}
+	else{
+		querystring += " FROM User where ";
+		ia=2;
+	}	
+
+	return;
+
+}
+
+function reorder(){
+
+	htmlstring="<div class=\"bWizardBlock tertiaryPalette\"><div class=\"pbWizardTitle tertiaryPalette\" style=\"background-color:rgb(255,128,0)\"><div class=\"ptRightTitle\">Step 2 of 2</div><h2>Step 2: Order the User fields</h2></div><div class=\"pbBody\"><div class=\"pbWizardHeader\"><div class=\"pbTopButtons\" style=\"white-space: nowrap\"><input value=\" Done \"  class=\"btn\" onclick=\"javascript:onGo2();\"></div></div><div class=\"pbWizardBody\"><div class=\"columnsStep\"><div class=\"bReport\"><div class=\"selectReportColumns\"><TABLE  class=\"bPageBlock\"><TR><TD colspan=\"4\"><div class=\"pbHeader categoryHeader\"><TABLE  class=\"tertiaryPalette\" style=\"background:rgb(255,128,0)\"><TR><TD class=\"pbTitle\"><img src=\"/s.gif\" alt=\"\" title=\"\" width=1 height=1 class=\"minWidth\"><h3>Order User fields in the way you wish to view them.</h3></TD></TR></TABLE></div></TD></TR><TR><TD>";
+	htmlstring+="<br><br><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Selected Columns</b><br>";
+	htmlstring+="<table><tr><td><form name=\"columns\"><select  multiple=\"multiple\" id=\"select1\" style=\"{width: 200px}\" size=\"20\" name=\"select1\">";
+
+	for(var w=0;w<dispfields.length;w++){
+		if(dispfields[w]=="ProfileId")
+			htmlstring+="<option value=\"" + dispfields[w] + "\">Profile</option>";
+		else if(dispfields[w]=="CreatedById")
+			htmlstring+="<option value=\"" + dispfields[w] + "\">Created By</option>";
+		else if(dispfields[w]=="LastModifiedById")
+			htmlstring+="<option value=\"" + dispfields[w] + "\">Last Modified By</option>";
+		else if(dispfields[w]=="DelegatedApproverId")
+			htmlstring+="<option value=\"" + dispfields[w] + "\">Delegated Approver</option>";
+		else
+			htmlstring+="<option value=\"" + dispfields[w] + "\">" + fieldlookup(dispfields[w]) + "</option>";
+	}
+
+	htmlstring+="</select></form></td><td align='center' valign='center'>Top<br><a href=\"javascript:moveTop(document.columns.select1);\"><img src=\"/s.gif\" alt=\"Top\"  class=\"doubleArrowUp\"></a><br>";
+	htmlstring+="Up<br><a href=\"javascript:moveUp(document.columns.select1);\"><img src=\"/s.gif\" alt=\"Up\"  class=\"upArrowIcon\"></a><br>";
+	htmlstring+="<a href=\"javascript:moveDown(document.columns.select1);\"><img src=\"/s.gif\" alt=\"Down\"  class=\"downArrowIcon\"></a><br>Down<br>";
+	htmlstring+="<a href=\"javascript:moveBottom(document.columns.select1);\"><img src=\"/s.gif\" alt=\"Bottom\"  class=\"doubleArrowDwn\"></a><br>Bottom";
+
+	htmlstring+="</td></tr></table><br><br>";
+	htmlstring+="</TD></TR></TABLE></div></div></div></div><div class=\"pbWizardFooter\"><div class=\"pbBottomButtons\"><input value=\" Done \"  class=\"btn\" onclick=\"javascript:onGo2();\"></div><input value=\" Back \"  class=\"btn\" onclick=\"javascript:onBack();\"></div></div></div></td></tr></table>";
+
+	document.getElementById("content").innerHTML=htmlstring;
+
+	resizeframe();
+
+}
+	function onBack(){
+
+		orderbuild();
+		optionmenu();
+	}
+
+	function onGo2(){
+
+		orderbuild();
+		Hierarchy();
+		storeCookie();
+	}
+
+
+
+
+function orderbuild(){
+
+	for(var j=0;j<dispfields.length;j++){
+		dispfields[j]=document.columns.select1.options[j].value;
+	}
+
+	lastfields=dispfields;
+}
+
+function ordermem(){
+
+	var found2=0;
+
+	dispfields=new Array;
+
+	for(var a=0;a<lastfields.length;a++){
+		for(var b=0;b<newfields.length;b++){
+			if(newfields[b]==lastfields[a]){
+				dispfields.push(newfields[b]);
+			}
+		}
+	}
+
+	for(var c=0;c<newfields.length;c++){
+		found2=0;
+
+		if(dispfields!=null){
+			for(var d=0;d<dispfields.length;d++){
+				if(dispfields[d]==newfields[c]){
+					found2=1;
+				}
+			}
+		}
+
+		if(found2!=1){
+			var t=dispfields.push(newfields[c]);
+		}
+	}
+
+	lastfields=dispfields;
+}
+
+function resizeframe(){
+
+	itarget=top.document.getElementById("itarget");
+
+	itarget.style.height=document.body.clientHeight + "px";
+
+}
+	
+
+	
+function exploder(roleid){
+
+	var confirm2 = confirm("This action may take significant time to complete.\n\nClick 'OK' to continue");
+
+	if(!confirm2)
+		return;
+
+	if(roleid!="All"){
+		for(var o=0;o<nodelist.length;o++){
+			if(nodelist[o].id==roleid){
+				break;
+				}
+		}
+
+		if(nodelist[o].flag==0){
+			ShowHideUsers(roleid,o);
+		}
+		explode(roleid);
+	}
+	else{
+		explode(nullvar);
+	}
+
+	if(unassshow==0){
+		ShowHideUsers("","");
+	}
+
+	return;
+}
+
+
+function explode(roleid){
+
+	for(var h=0;h<nodelist.length;h++){
+		if(nodelist[h].ParentRoleId==roleid){
+			if(nodelist[h].flag==0)
+				ShowHideUsers(nodelist[h].id,h);
+			explode(nodelist[h].id);
+		}
+	}
+
+	return;
+}
+
+function imploder(roleid){
+
+	if(roleid!="All"){
+		for(var o=0;o<nodelist.length;o++){
+			if(nodelist[o].id==roleid){
+				break;
+				}
+		}
+
+		if(nodelist[o].flag!=0){
+			ShowHideUsers(roleid,o);
+		}
+		implode(roleid);
+	}
+	else{
+		implode(nullvar);
+	}
+
+	if(unassshow!=0){
+		ShowHideUsers("","");
+	}
+
+	return;
+}
+
+
+function implode(roleid){
+
+	for(var h=0;h<nodelist.length;h++){
+		if(nodelist[h].ParentRoleId==roleid){
+			if(nodelist[h].flag!=0)
+				ShowHideUsers(nodelist[h].id,h);
+			implode(nodelist[h].id);
+		}
+	}
+
+	return;
+}
+
+
+function init(){
+
+	tablelist = document.getElementsByTagName("table");
+	window.scrollTo(0,0);
+
+}
+
+function locate(){
+
+	if(IE){
+		tempY = event.clientY + document.body.scrollTop;
+	}
+	else{
+		tempY = e.pageY;
+	}
+
+	for(var t=1;t<tablelist.length+1;t++){
+		if(tablelist[t].offsetTop>tempY){
+			document.title = tablelist[t-1].id;
+			return;
+		}
+	}
+
+	return;
+}
+
+function saveopenroles(){
+
+	openroles=new Array;
+
+	for(var g=0;g<nodelist.length;g++){
+		if(nodelist[g].flag!=0)
+			openroles.push(nodelist[g].id);
+	}
+}
+
+function restoreopenroles(){
+
+	for(var t=0;t<openroles.length;t++){
+		for(var g=0;g<nodelist.length;g++){
+			if(nodelist[g].id==openroles[t])
+				ShowHideUsers(openroles[t],findindex(openroles[t]));
+		}
+	}
+
+	if(unassshow>0){
+		unassshow=0;
+		ShowHideUsers("","");
+	}
+}
+
+function feedback(){
+
+	var urlstring="http://www.drivenable.com/feedback.htm?name=";
+
+	var result=sforce.connection.getUserInfo();
+
+	urlstring+= result.userFullName + "&email=" + result.userEmail + "&company=" + result.organizationName;
+
+	var mywin = window.open(urlstring,"feedback","location=no,menubar=no,scrollbars=no,toolbar=no,resizable=no,height=540,width=370,directories=no");
+
+}
+
+function qorderback(myfield){
+
+	if(myfield==qorder && qdir=="ASC")
+		qdir="DESC";
+	else
+		qdir="ASC";
+
+	qorder=myfield;
+
+	Hierarchy();
+}
+
+function showmenu(){
+
+	var cm=document.getElementById('coolmenu');
+
+	cm.style.visibility='visible';
+
+	var tempint=document.body.clientWidth-220;
+
+	cm.style.left=tempint + "px";
+
+	// DOM level 2
+	if(document.addEventListener) {
+		document.addEventListener("mousemove", menuout, true);
+	}
+
+	// IE 5+ Event Model
+	else if(document.attachEvent){
+		//elementToDrag.setCapture();
+		document.attachEvent("onmousemove", menuout);
+		document.attachEvent("onlosecapture", menuout);
+	}
+
+	// IE 4 Event Model
+	else{
+		document.onmousemove = menuout;
+	}
+
+}
+
+function menuout(e){
+
+	if(!e) e = window.event;
+
+	var pwidth=document.body.clientWidth;
+
+	if(e.clientX<pwidth-220 || e.clientY>210 || e.clientY<1 || e.clientX>pwidth){
+
+		hidemenu();
+
+		// DOM
+		if(document.removeEventListener) {
+			document.removeEventListener("mousemove", menuout, true);
+		}
+
+		// IE 5+ Event Model
+		else if(document.detachEvent) {
+			document.detachEvent("onlosecapture", menuout);
+			document.detachEvent("onmousemove", menuout);
+			//elementToDrag.releaseCapture();
+		}
+
+		// IE 4 Event Model
+		else{
+			document.onmousemove = null;
+		}
+	}
+}
+
+	
+
+function hidemenu(){
+
+	var cm=document.getElementById('coolmenu');
+
+	cm.style.visibility='hidden';
+
+}
+
+	
+
+
+/*************************************************************************************
+  DRAG AND DROP FUNCTION
+*************************************************************************************/
+
+
+function drag(objectType, objectId, elementToDrag, event){
+
+	var t, scroll, itarget_height, top_height, found=false;
+	var startX = event.clientX+document.body.scrollLeft, startY = event.clientY+document.body.scrollTop;
+	var origX = elementToDrag.offsetLeft, origY = elementToDrag.offsetTop;
+	var deltaX = startX - origX, deltaY = startY - origY;
+
+	// DOM level 2
+	if(document.addEventListener) {
+		document.addEventListener("mousemove", moveHandler, true);
+		document.addEventListener("mouseup", upHandler, true);
+	}
+
+	// IE 5+ Event Model
+	else if(document.attachEvent){
+		elementToDrag.setCapture();
+		elementToDrag.attachEvent("onmousemove", moveHandler);
+		elementToDrag.attachEvent("onmouseup", upHandler);
+		elementToDrag.attachEvent("onlosecapture", upHandler);
+	}
+
+	// IE 4 Event Model
+	else{
+		var oldmovehandler = document.onmousemove;
+		var olduphandler = document.onmouseup;
+		document.onmousemove = moveHandler;
+		document.onmouseup = upHandler;
+	}
+
+	// Preventing other handlers and or default actions
+	if(event.stopPropagation) event.stopPropagation();
+	else event.cancelBubble = true;
+
+	if(event.preventDefault) event.preventDefault();
+	else event.returnValue = false;
+
+/*
+	if(typeof window.innerHeight=='number')
+		ph=window.innerHeight;
+	else if(document.documentElement && document.documentElement.clientHeight)
+		ph=document.documentElement.clientHeight;
+	else
+*/
+	itarget_height=document.body.clientHeight;
+	top_height=top.document.body.parentNode.clientHeight;
+
+	for(r=2;r<tablelist.length;r++){
+		if(tablelist[r].offsetTop>startY){
+			originaldropid = tablelist[r-1].id;
+			break;
+		}
+	}
+
+	function moveHandler(e) {
+
+		if(!e) e = window.event;
+
+		if(e.clientY+96-top.document.body.parentNode.scrollTop>top_height-15){
+			top.window.scrollBy(0,10);
+		}
+
+		else if(e.clientY+96-top.document.body.parentNode.scrollTop<15){
+			top.window.scrollBy(0,-10);
+		}
+
+		scroll=(document.body.scrollTop)?document.body.scrollTop:0;
+
+		elementToDrag.style.left = (e.clientX + document.body.scrollLeft - deltaX) + "px";
+		elementToDrag.style.top = (e.clientY + document.body.scrollTop - deltaY) + "px";
+
+		if(e.stopPropagation) e.stopPropagation();
+		else e.cancelBubble = true;
+
+		for(t=2;t<tablelist.length;t++){
+			if(tablelist[t].offsetTop>e.clientY + scroll){
+				currentdropid = tablelist[t-1].id;
+				found=true;
+				break;
+			}
+		}
+
+		if(currentdropid!=lastdropid){
+			if(currentdropid!=originaldropid)
+				document.getElementById(currentdropid).style.background='rgb(137,182,46)';
+			if(lastdropid)
+				document.getElementById(lastdropid).style.background='white';
+		}
+
+		lastdropid=currentdropid;
+
+	}
+
+	function upHandler(e) {
+
+		if(!e) e = window.event;
+
+		// DOM
+		if(document.removeEventListener) {
+			document.removeEventListener("mouseup", upHandler, true);
+			document.removeEventListener("mousemove", moveHandler, true);
+		}
+
+		// IE 5+ Event Model
+		else if(document.detachEvent) {
+			elementToDrag.detachEvent("onlosecapture", upHandler);
+			elementToDrag.detachEvent("onmouseup", upHandler);
+			elementToDrag.detachEvent("onmousemove", moveHandler);
+			elementToDrag.releaseCapture();
+		}
+
+		// IE 4 Event Model
+		else{
+			document.onmouseup = olduphandler;
+			document.onmousemove = oldmovehandler;
+		}
+
+		if(e.stopPropagation) e.stopPropagation();
+		else e.cancelBubble = true;
+
+		if(objectType=="user"){
+
+			//enter confirmation pop-up code here
+
+			try{
+				var thisUser = sforce.connection.retrieve("UserRoleId","User",[objectId]);
+			}
+			catch(error){
+				alert("An error has occured while retrieving user record: \n\n" + error);
+			}
+			
+			tempobjectid=thisUser[0].get("UserRoleId");
+
+			if(tempobjectid!=currentdropid){
+
+				var confirmation=1;
+
+				if(confirmdnd=='1')
+					confirmation=confirm("Are you sure you wish to move this User?\n\nClick 'OK' to continue");
+
+				if(confirmation){
+
+					popup = window.open("/img/waiting_dots.gif","waiting","location=no,menubar=no,scrollbars=no,toolbar=no,resizable=no,height=20,width=215, left=200, top=200,directories=no");
+
+					if(currentdropid=="unassigned"){
+						thisUser[0].UserRoleId=null;
+					}
+					else{
+						thisUser[0].set("UserRoleId",currentdropid);
+					}
+					
+					function failure1(error){
+
+						if(popup.closed==false)
+							popup.close();
+
+
+						alert("An error has occured while updating user record: \n\n" + error.message);
+						elementToDrag.style.left = origX + "px";
+						elementToDrag.style.top = origY + "px";
+						document.getElementById(currentdropid).style.background='white';
+
+					}
+
+					function success1(result){
+
+						if(result[0].success=='false'){
+							var serror = result[0].get("errors");
+							alert(serror.get("message"));
+							elementToDrag.style.left = origX + "px";
+							elementToDrag.style.top = origY + "px";
+							document.getElementById(currentdropid).style.background='white';
+
+							if(popup.closed==false)
+								popup.close();
+
+							return;
+						}
+
+						if(currentdropid!="unassigned"){
+
+							var currentindex=findindex(currentdropid);
+							if(nodelist[currentindex].flag!=0){
+								noresize=1;
+								ShowHideUsers(currentdropid,currentindex);
+							}
+							ShowHideUsers(currentdropid,currentindex);
+						}
+						else{
+							if(unassshow!=0){
+								noresize=1;
+								ShowHideUsers("","");
+							}
+							ShowHideUsers("","");
+						}
+
+						if(tempobjectid!=null){
+
+							var originalindex=findindex(tempobjectid);
+							noresize=1;
+							ShowHideUsers(tempobjectid,originalindex);
+							ShowHideUsers(tempobjectid,originalindex);
+						}
+						else{
+							noresize=1;
+							ShowHideUsers("","");
+							ShowHideUsers("","");
+						}
+
+						if(popup.closed==false)
+							popup.close();
+					}
+
+					var usermovestatus = sforce.connection.update([thisUser[0]], { onSuccess : success1, onFailure: failure1 });
+
+
+				}
+				else{
+					elementToDrag.style.left = origX + "px";
+					elementToDrag.style.top = origY + "px";
+				}
+
+				document.getElementById(currentdropid).style.background='white';
+			}
+	
+			else{
+				elementToDrag.style.left = origX + "px";
+				elementToDrag.style.top = origY + "px";
+
+				document.getElementById(currentdropid).style.background='white';
+				
+			}
+
+		}
+		else if(objectType=="role"){
+
+			try{
+			var thisRole = sforce.connection.retrieve("ParentRoleId","UserRole",[objectId]);
+			}
+			catch(error){
+				alert("An error has occured while retrieving Role record: \n\n" + error.message);
+
+				elementToDrag.style.left = origX + "px";
+				elementToDrag.style.top = origY + "px";
+
+				document.getElementById(currentdropid).style.background='white';
+			}
+			
+			tempobjectid=thisRole[0].get("ParentRoleId");
+
+			//dropping on itself or parent results in return to original spot
+			if(tempobjectid!=currentdropid&&objectId!=currentdropid&&currentdropid!="unassigned"){
+
+				var confirmation=1;
+
+				if(confirmdnd=='1')
+					confirmation=confirm("Are you sure you wish to move this Role?\n\nClick 'OK' to continue");
+
+				if(confirmation){
+
+					popup = window.open("/img/waiting_dots.gif","waiting","location=no,menubar=no,scrollbars=no,toolbar=no,resizable=no,height=20,width=215, left=200, top=200,directories=no");
+
+					thisRole[0].set("ParentRoleId",currentdropid);
+
+					function failure2(error){
+
+						if(popup.closed==false)
+							popup.close();
+
+						alert("An error has occured while updating Role record: \n\n" + error);
+
+						elementToDrag.style.left = origX + "px";
+						elementToDrag.style.top = origY + "px";
+
+						document.getElementById(currentdropid).style.background='white';
+					}
+
+					function success2(result){
+
+						if(result[0].success=='false'){
+							var serror = result[0].get("errors");
+							alert(serror.get("message"));
+							elementToDrag.style.left = origX + "px";
+							elementToDrag.style.top = origY + "px";
+							document.getElementById(currentdropid).style.background='white';
+							if(popup.closed==false)
+								popup.close();
+							return;
+						}
+
+						var originalindex=findindex(tempobjectid);
+						var currentindex=findindex(currentdropid);
+//						while(thisRole[0].get("ParentRoleId")==tempobjectid)
+//							thisRole = sforce.connection.retrieve("ParentRoleId","UserRole",[objectId]);
+
+						var bookmark=document.body.scrollTop;
+						saveopenroles();
+
+						kickoff();
+						restoreopenroles();
+
+						window.scrollBy(0,bookmark);
+
+						if(popup.closed==false)
+							popup.close();
+					}
+
+					var saveResult = sforce.connection.update([thisRole[0]], { onSuccess : success2, onFailure: failure2 });
+
+				}
+				else{
+					elementToDrag.style.left = origX + "px";
+					elementToDrag.style.top = origY + "px";
+
+					document.getElementById(currentdropid).style.background='white';
+				}
+			}
+	
+			else{
+				elementToDrag.style.left = origX + "px";
+				elementToDrag.style.top = origY + "px";
+
+				document.getElementById(currentdropid).style.background='white';
+				
+			}
+
+		}
+
+	}
+}
+
+function findindex(RoleId){
+
+	for(var a=0;a<nodelist.length;a++){
+		if(nodelist[a].id==RoleId)
+			return a;
+	}
+	return error;
+}
+
+
+/*************************************************************************************
+  REORDER FUNCTIONS
+*************************************************************************************/
+
+
+function moveUp(sourceSelect, topSourceValue, unmovableAlertMessage) {
+    if (sourceSelect.length > 1) {
+        var options = sourceSelect.options;
+
+        var selectedIds = new Array ();
+        var index = 0;
+        if (topSourceValue != null) {
+            if (options[0].value == topSourceValue && options[1].selected) {
+                options[1].selected = false;
+                if (unmovableAlertMessage != null) {
+                    alert(unmovableAlertMessage);
+                    return;
+                }
+            }
+        }
+        for (var i = 1; i < sourceSelect.length; i++) {
+            if (options[i].selected) {
+                selectedIds[index] = i;
+                index++;
+            }
+        }
+
+        var selId;
+        for (var i = 0; i < selectedIds.length; i++) {
+            selId = selectedIds[i];
+            privateMoveUp (options, selId);
+            options[selId].selected = false;
+            options[selId-1].selected = true;
+        }
+
+        sourceSelect.focus ();
+
+        if (sourceSelect["onLocalMoveUp"])
+            sourceSelect.onLocalMoveUp();
+    }
+}
+
+function moveDown(sourceSelect, topSourceValue, unmovableAlertMessage) {
+    if (sourceSelect.length > 1) {
+        var options = sourceSelect.options;
+
+        var selectedIds = new Array ();
+        var index = 0;
+        if (topSourceValue != null) {
+
+            if (topSourceValue == options[0].value && options[0].selected) {
+                options[0].selected = false;
+                if (unmovableAlertMessage != null)
+                    alert(unmovableAlertMessage);
+            }
+        }
+
+        for (var i = sourceSelect.length-2; i >= 0; i--) {
+            if (sourceSelect.options[i].selected) {
+
+                selectedIds[index] = i;
+                index++;
+            }
+        }
+
+        var selId;
+        for (var i = 0; i < selectedIds.length; i++) {
+            selId = selectedIds[i];
+            privateMoveDown (options, selId);
+            options[selId].selected = false;
+            options[selId+1].selected = true;
+        }
+
+        sourceSelect.focus ();
+
+        if (sourceSelect["onLocalMoveDown"])
+            sourceSelect.onLocalMoveDown();
+    }
+}
+
+function moveTop(sourceSelect) {
+
+    if (sourceSelect.length > 1) {
+        var options = sourceSelect.options;
+
+        var selectedIds = new Array ();
+        var index = 0;
+
+        for (var i = 0; i < sourceSelect.length; i++) {
+            if (options[i].selected) {
+                selectedIds[index] = i;
+                index++;
+            }
+        }
+
+
+        var selId;
+        for (var i = 0; i < selectedIds.length; i++) {
+            selId = selectedIds[i];
+
+            delta = selId-i;
+            for (var j = 0 ; j < delta; j++) {
+                privateMoveUp (options, selId-j);
+                options[selId-j].selected = false;
+                options[(selId-j)-1].selected = true;
+                }
+        }
+
+        sourceSelect.focus ();
+
+        if (sourceSelect["onLocalMoveTop"])
+            sourceSelect.onLocalMoveTop();
+    }
+}
+
+function moveBottom(sourceSelect) {
+
+    if (sourceSelect.length > 1) {
+        var options = sourceSelect.options;
+
+        var selectedIds = new Array ();
+        var index = 0;
+
+        for (var i = 0; i < sourceSelect.length; i++) {
+            if (options[i].selected) {
+                selectedIds[index] = i;
+                index++;
+            }
+        }
+
+        var targetPos = sourceSelect.length-1;
+        var selId;
+        for (var i = selectedIds.length-1; i >= 0 ; i--) {
+            selId = selectedIds[i];
+
+            var delta = targetPos-selId;
+            for (var j = 0 ; j < delta; j++) {
+                privateMoveDown (options, selId+j);
+                options[selId+j].selected = false;
+                options[(selId+j)+1].selected = true;
+                }
+            targetPos--;
+        }
+
+        sourceSelect.focus ();
+
+        if (sourceSelect["onLocalMoveBottom"])
+            sourceSelect.onLocalMoveBottom();
+    }
+}
+
+function privateMoveUp (options, index) {
+    var newOption = new Option (options[index-1].text, options[index-1].value);
+    options[index-1].text = options[index].text;
+    options[index-1].value = options[index].value;
+    options[index].text = newOption.text;
+    options[index].value = newOption.value;
+}
+
+function privateMoveDown (options, index) {
+    var newOption = new Option (options[index+1].text, options[index+1].value);
+    options[index+1].text = options[index].text;
+    options[index+1].value = options[index].value;
+    options[index].text = newOption.text;
+    options[index].value = newOption.value;
+}
+
+/*************************************************************************************
+  COOKIE FUNCTIONS
+*************************************************************************************/
+
+function storeCookie(){
+
+	var cstring = showroledescription + confirmdnd + ia + ".." + toprole + "...";
+
+	for(var e=0;e<dispfieldcount;e++){
+
+		cstring+=dispfields[e] + ".";
+
+	}
+
+	document.cookie="options=" + escape(cstring) + "!!;expires=" + new Date("1/1/2100");
+}
+
+function getCookie(){
+
+	var startC = document.cookie.indexOf("options=");
+	var endC = document.cookie.indexOf(";", startC);
+	var cookieresult= document.cookie.substring(startC+8,endC);
+	var fieldstring, currentfield="";
+
+	if(cookieresult.substring(3,5)==".."){
+		showroledescription=cookieresult.substring(0,1);
+		confirmdnd=cookieresult.substring(1,2);
+		ia=cookieresult.substring(2,3);
+		toprole=cookieresult.substring(5,cookieresult.indexOf("..."));
+		fieldstring=cookieresult.substring(cookieresult.indexOf("...")+3,cookieresult.indexOf("!!"));
+
+		dispfieldcount=0;
+		dispfields=new Array;
+	
+		for(var s=0;s<fieldstring.length;s++){
+
+			if(fieldstring.charAt(s)=="."){
+				if(fieldlookup(currentfield)!="error"){
+					dispfieldcount++;
+					dispfields[dispfieldcount-1]=currentfield;
+				}
+				currentfield="";
+			}
+			else{
+				currentfield+=fieldstring.charAt(s);
+			}
+		}
+
+		querystring = "Select Id, ";
+
+		for(var x=0;x<dispfieldcount;x++){
+			if(dispfields[x]!="Id")
+				querystring+=dispfields[x] + ", ";
+		}
+
+		querystring=querystring.substring(0,querystring.length-2);
+
+		if(ia==0){
+			querystring += " FROM User where isActive=true AND ";
+		}
+		else if(ia==1){
+			querystring += " FROM User where isActive=false AND ";
+		}
+		else{
+			querystring += " FROM User where ";
+		}
+
+		lastfields=dispfields;
+	}
+
+	else{
+		toprole="All";
+		ia='0';
+		showroledescription='1';
+		confirmdnd='1';
+		dispfieldcount=3;
+ 		dispfields = new Array("FirstName", "LastName", "Email");
+ 		lastfields = new Array("FirstName", "LastName", "Email");
+		querystring = "Select Id, FirstName, LastName, email FROM User Where isActive=TRUE AND ";	
+	}
+	return;		
+	
+}
+
+</script>
+<div class="titlebar"><table width="100%"><tr><td>&nbsp;&nbsp;&nbsp;<img src="/servlet/servlet.FileDownload?file=015300000007PyI"></td><td align="right"><img onmouseover="showmenu();" src="/servlet/servlet.FileDownload?file=01530000000S11U">&nbsp;&nbsp;&nbsp;&nbsp;</td></tr></table></div>
+<br>
+<div id="content">
+</div>
+
+<br><right><table id="placeholder" width="100%">
+<tr><td align="right" valign="center"><span class="plug"><i>Brought to you by</i></span></td><td width="101px"><a href="http://www.drivenable.com" target="_blank"><img src="/servlet/servlet.FileDownload?file=015300000007R2Q"></a></td></tr>
+</table></right>
+
+<div border=1 id="coolmenu" class="coolmenu">
+<a href="http://www.drivenable.com/docs/DR_User_Guide.pdf" target="_blank"><u><b><i>View User Guide</i></b></u></a><br>
+<a onclick="feedback();"><u><b><i>Provide Feedback</i></b></u></a><br>
+<a href="http://www.drivenable.com/dr_review.htm" target="_blank"><u><b><i>Post a Review for this App</i></b></u></a><br>
+<a href="http://www.drivenable.com" target="_blank"><u><b><i>Visit DrivEnable.com</i></b></u></a><br>
+<a href="http://www.drivenable.com/contact.htm" target="_blank"><u><b><i>Contact Us</i></b></u></a><br>
+<a onclick="alert('Draggin\' Role\nVersion 1.4\n\nDeveloped exclusively for the AppExchange\n\nCopyright 2009 DrivEnable LLC');"><u><b><i>About</i></b></u></a></a>
+</div>
+
+
+
+
+<script type="text/javascript">
+
+
+/*************************************************************************************
+  CREATE USERFIELD LOOKUP TABLE / FUNCTION
+*************************************************************************************/
+try{
+	userDescription = sforce.connection.describeSObject("User");
+}
+catch(error){
+	alert("An error has occured while gathering User Object description: \n\n" + error);
+}
+	
+userDescriptionFields = userDescription.getArray("fields");
+
+for(var a=0;a<userDescriptionFields.length;a++){
+
+	fieldlist[a]=new Field;
+	fieldlist[a].name=userDescriptionFields[a].name;
+	fieldlist[a].label=userDescriptionFields[a].label;
+	fieldlist[a].type=userDescriptionFields[a].type;
+
+}
+
+function fieldlookup(name){
+
+	for(var d=0;d<fieldlist.length;d++){
+		if(name==fieldlist[d].name)
+			return fieldlist[d].label;
+	}
+
+	return "error";
+}
+
+function fieldtypelookup(name){
+
+	for(var d=0;d<fieldlist.length;d++){
+		if(name==fieldlist[d].name)
+			return fieldlist[d].type;
+	}
+
+	return "error";	
+
+}
+
+
+/*************************************************************************************
+  QUERY AND STORE USERROLES
+*************************************************************************************/
+
+function kickoff(){
+
+	var queryResult = new Array(), queryRecords = new Array();
+	var z=1;
+	var rcounter = 0;
+
+	try{
+		queryResult[0] = sforce.connection.query("Select Id, Name, ParentRoleId, RollupDescription FROM UserRole ORDER BY Name ASC");
+	}
+	catch(error){
+		alert("An error has occured during initial Role load: \n\n" + error);
+		return;
+	}
+
+	if(queryResult[0].size==0){
+		htmlstring="<br><br>Your Role Hierarchy is empty!<br><br><a href='javascript:top.window.location=\"/00E/e?parent=000000000000000\"'>Click here</a> to create your first Role.";
+		document.getElementById("content").innerHTML=htmlstring;
+	}
+	else{
+		nodelist=new Array(1);
+
+		while(queryResult[z-1].done=="false"){
+			queryResult[z]=sforce.connection.queryMore(queryResult[z-1].queryLocator);
+			z++;
+		}
+
+		for(var g=0;g<z;g++){
+			for(var h=0;h<500;h++){
+				if(queryResult[0].size!=1)
+					nodelist[rcounter]= new Node(queryResult[g].records[h].get("Id"), queryResult[g].records[h].get("Name"), queryResult[g].records[h].get("ParentRoleId"), queryResult[g].records[h].get("RollupDescription"));
+				else
+					nodelist[rcounter]= new Node(queryResult[g].records.get("Id"), queryResult[g].records.get("Name"), queryResult[g].records.get("ParentRoleId"), queryResult[g].records.get("RollupDescription"));
+				rcounter++;
+				if(rcounter==queryResult[0].size)
+					break;
+			}
+		}
+	}
+
+	var topcheck=0;
+
+	if(nodelist!=null){
+
+		//make sure cookie's top role still exists
+		for(var v=0;v<nodelist.length;v++){
+			if(nodelist[v].id==toprole){
+				topcheck=1;
+				break;
+			}
+		}
+
+		if(topcheck==0)
+			toprole="All";
+
+		Hierarchy();
+	}
+}
+
+
+
+
+window.onload=init;
+getCookie();
+kickoff();
+
+</script>
+
+
+
+</body>
+</html>

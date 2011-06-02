@@ -1,0 +1,29 @@
+<apex:page standardController="Account"
+recordSetVar="accounts">
+    hihi
+<chatter:feedWithFollowers entityId="0015000000WTgmD"> </chatter:feedWithFollowers>   
+    
+  <apex:form >
+  <apex:inputField value="{!Account.Name}"/>
+  </apex:form>
+  
+  
+  
+  <apex:pageBlock >
+  <apex:form >
+  
+  <apex:pageBlockTable value="{!accounts}" var="account">
+  
+ <apex:column headerValue="Name"><apex:inputField value="{!account.name}"/></apex:column>
+ <apex:inputFile value="{!account.ShippingCity}"> </apex:inputFile>
+  <apex:column value="{!account.ShippingCity}"/>
+  <apex:column value="{!account.ShippingState}"/>
+  <apex:column value="{!account.Phone}"/>
+
+  
+  </apex:pageBlockTable>
+  <apex:commandButton action="{!Save}" value="Save"/>
+  </apex:form>
+  </apex:PageBlock>
+
+</apex:page>

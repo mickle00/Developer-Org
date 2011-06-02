@@ -1,0 +1,130 @@
+<apex:page showHeader="false" sidebar="false" >
+
+
+<!--  ----------------------------------------------------------------------  -->
+<!--  NOTE: Please add the following <META> element to your page <HEAD>.      -->
+<!--  If necessary, please modify the charset parameter to specify the        -->
+<!--  character set of your HTML page.                                        -->
+<!--  ----------------------------------------------------------------------  -->
+
+<META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=UTF-8"></meta>
+
+<!--  ----------------------------------------------------------------------  -->
+<!--  NOTE: Please add the following <FORM> element to your page.             -->
+<!--  ----------------------------------------------------------------------  -->
+<!-- 
+<br/>
+<h1>Link to new form hosted on Salesforce Sites: </h1><a href="http://gso.dharma.cs7.force.com/" target="_top">http://gso.dharma.cs7.force.com/</a>
+<table width="70%" height="90%">
+<tr><td>
+<iframe src="http://gso.dharma.cs7.force.com/" width="100%" height="90%">
+  <p>Your browser does not support iframes.</p>
+</iframe>
+</td></tr>
+</table>
+
+
+
+<br/><br/>
+<table border="1" width="300px">
+<center>
+<th align="center" colspan="2">Old form using <font color="red">HTTP POST</font> to SFDC WebToCase:</th>
+
+<form action="https://cs7.salesforce.com/servlet/servlet.WebToCase?encoding=UTF-8" method="POST">
+
+<input type="hidden" name="orgid" value="00DM0000000CoFZ"></input>
+<input type="hidden" name="retURL" value="http://mikescloud.info"></input>
+
+<!--  ----------------------------------------------------------------------  -->
+<!--  NOTE: These fields are optional debugging elements.  Please uncomment   -->
+<!--  these lines if you wish to test in debug mode.                          -->
+<!--  <input type="hidden" name="debug" value=1>                              -->
+<!--  <input type="hidden" name="debugEmail"                                  -->
+<!--  value="admin@salesforce.michaelpatrickstewart.com">                     -->
+<!--  ----------------------------------------------------------------------  -->
+
+<!--
+<tr><td align="right">
+<label for="name">Contact Name: </label><input  id="name" maxlength="80" name="name" size="20" type="text" /><br></br>
+</td></tr><tr><td align="right">
+<label for="email">Email: </label><input  id="email" maxlength="80" name="email" size="20" type="text" /><br></br>
+</td></tr><tr><td align="right">
+<label for="phone">Phone: </label><input  id="phone" maxlength="40" name="phone" size="20" type="text" /><br></br>
+</td></tr><tr><td align="right">
+<label for="subject">Subject: </label><input  id="subject" maxlength="80" name="subject" size="20" type="text" /><br></br>
+</td></tr><tr><td align="right">
+<label for="description">Description: </label><textarea name="description"></textarea><br></br>
+
+<input type="hidden"  id="external" name="external" value="1" /><br></br>
+</td></tr><tr><td align="center">
+<input type="submit" name="submit"></input>
+</td></tr>
+</form>
+<br></br>
+</center>
+</table>
+
+<br/><br/>
+OR<br></br><br/>
+
+You can email: <a href="mailto:a-mistewart@gv4va04wsdlp8w6y5fiigi8u.mcofzma0.m.case.sandbox.salesforce.com">a-mistewart@gv4va04wsdlp8w6y5fiigi8u.mcofzma0.m.case.sandbox.salesforce.com</a> 
+
+<br/><br/>
+-->
+
+
+<center>
+<table border="0" width="98%">
+<tr>
+<td colspan="1" align="center" style="background-color:#717D7D;">
+<h1>Old HTTP Post</h1>
+</td>
+<td colspan="1" align="center" style="background-color:#717D7D;">
+
+<h1>New Visualforce Page</h1> <a href="http://gso.dharma.cs7.force.com/" target="_top">http://gso.dharma.cs7.force.com/</a>
+</td>
+</tr>
+
+<tr valign="top">
+<td style="background-color:#C0C0C0;text-align:top;">
+
+<table border="1">
+<center>
+<th align="center" colspan="2">Old form using <font color="red">HTTP POST</font> to SFDC WebToCase:</th>
+<form action="https://cs7.salesforce.com/servlet/servlet.WebToCase?encoding=UTF-8" method="POST" height="50%">
+<input type="hidden" name="orgid" value="00DM0000000CoFZ"></input>
+<input type="hidden" name="retURL" value="http://mikescloud.info"></input>
+<tr><td align="right">
+<label for="name">Contact Name: </label><input  id="name" maxlength="80" name="name" size="20" type="text" /><br></br>
+</td></tr><tr><td align="right">
+<label for="email">Email: </label><input  id="email" maxlength="80" name="email" size="20" type="text" /><br></br>
+</td></tr><tr><td align="right">
+<label for="phone">Phone: </label><input  id="phone" maxlength="40" name="phone" size="20" type="text" /><br></br>
+</td></tr><tr><td align="right">
+<label for="subject">Subject: </label><input  id="subject" maxlength="80" name="subject" size="20" type="text" /><br></br>
+</td></tr><tr><td align="right">
+<label for="description">Description: </label><textarea name="description"></textarea><br></br>
+
+<input type="hidden"  id="external" name="external" value="1" /><br></br>
+</td></tr><tr><td align="center">
+<input type="submit" name="submit"></input>
+</td></tr>
+</form>
+</center>
+</table>
+
+</td>
+    <td style="background-color:#eeeeee;height:900px;width:100%;text-align:top;">
+    <iframe src="http://gso.dharma.cs7.force.com/" width="100%" height="100%">
+      <p>Your browser does not support iframes.</p>
+    </iframe>
+    </td>
+</tr>
+
+<tr>
+<td colspan="2" style="background-color:#717D7D;text-align:center;">
+&nbsp;</td>
+</tr>
+</table>
+</center>
+</apex:page>

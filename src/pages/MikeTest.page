@@ -1,0 +1,20 @@
+<apex:page standardController="Tracker__c"
+recordSetVar="trackers"
+sidebar="true" showHeader="true">
+ 
+  <apex:pageBlock >
+ <h1> WELCOME TO TEH CLOUDZ!!!1111 </h1>
+
+      <apex:pageBlockTable value="{!trackers}" var="a">
+      
+          <apex:column headerValue="Name" value="{!a.Name}" rendered="true"/>
+          <apex:column headerValue="Name" value="{!a.Url__c}" rendered="true"/>
+            
+    
+      
+      </apex:pageBlockTable>
+ 
+  
+  </apex:PageBlock>
+
+</apex:page>

@@ -1,0 +1,5 @@
+<apex:page standardController="Account">
+<table class="detailList">
+<td class="labelCol">Account ID:</td><td>{!Account.ID}</td>
+</table>
+</apex:page>

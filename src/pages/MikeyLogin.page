@@ -1,0 +1,13 @@
+<apex:page sidebar="true" showHeader="true">
+ <center>
+ 
+  <apex:pageBlock >
+  <h1><font size="6"><u>Login to Access l33tness</u></font></h1><br></br><br></br>
+    
+    <!-- <apex:include pageName="SiteLogin"/> -->
+    <c:SiteLogin id="siteLogin"/>
+ 
+  
+  </apex:PageBlock>
+</center>
+</apex:page>

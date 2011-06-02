@@ -1,0 +1,8 @@
+<apex:page standardcontroller="Case">
+<script>
+window.onload = new function(){
+alert('did this work');
+parent.doit;
+}
+</script>
+</apex:page>

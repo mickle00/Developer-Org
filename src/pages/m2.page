@@ -1,0 +1,6 @@
+<apex:page standardController="JobContactLink__c"
+sidebar="false" showHeader="false">
+    hihi
+<apex:detail />
+
+</apex:page>

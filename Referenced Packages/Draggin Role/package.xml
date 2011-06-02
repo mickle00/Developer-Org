@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Draggin Role</fullName>
+    <apiAccessLevel>Unrestricted</apiAccessLevel>
+    <namespacePrefix>DrivEnable</namespacePrefix>
+    <types>
+        <members>DR_Splash_Page</members>
+        <name>CustomPageWebLink</name>
+    </types>
+    <types>
+        <members>Roles</members>
+        <name>CustomTab</name>
+    </types>
+    <types>
+        <members>DragginRole</members>
+        <members>DragginRole/Arrows.gif</members>
+        <members>DragginRole/Closer.htm</members>
+        <members>DragginRole/DEButton.bmp</members>
+        <members>DragginRole/DELogo.bmp</members>
+        <members>DragginRole/DRButtonwmouse.gif</members>
+        <members>DragginRole/DRFade.gif</members>
+        <members>DragginRole/Logo.bmp</members>
+        <members>DragginRole/LogoMedium.gif</members>
+        <members>DragginRole/Person.gif</members>
+        <members>DragginRole/Up.gif</members>
+        <members>DragginRole/down.gif</members>
+        <name>Document</name>
+    </types>
+    <types>
+        <members>DragginRole</members>
+        <members>Splash</members>
+        <name>Scontrol</name>
+    </types>
+    <version>20.0</version>
+</Package>

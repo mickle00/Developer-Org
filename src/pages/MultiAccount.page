@@ -1,0 +1,35 @@
+<apex:page controller="multiAccountInsert">
+    <apex:form >
+        <apex:pageBlock >
+        
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Save" action="{!save}" rerender="error"/>
+            </apex:pageBlockButtons>
+        
+            <apex:pageBlockTable value="{!accts}" var="a" id="table">
+                <apex:facet name="footer">
+                    <apex:commandLink value="Add Row" action="{!addRow}" rerender="table,error"/>
+                </apex:facet>
+                <apex:column headerValue="Name">
+                    <apex:inputField value="{!a.Name}"/>
+                </apex:column>
+                <apex:column headerValue="Billing City">
+                    <apex:inputField value="{!a.BillingCity}"/>
+                </apex:column>                        
+            </apex:pageBlockTable>
+            
+            <apex:pageBlockTable value="{!cts}" var="c" id="tablec">
+                <apex:facet name="footer">
+                    <apex:commandLink value="Add Row" action="{!addRowc}" rerender="table,error"/>
+                </apex:facet>
+                <apex:column headerValue="Name">
+                    <apex:inputField value="{!c.LastName}"/>
+                </apex:column>
+                <apex:column headerValue="Title">
+                    <apex:inputField value="{!c.Title}"/>
+                </apex:column>                        
+            </apex:pageBlockTable>
+            
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
