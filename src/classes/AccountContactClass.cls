@@ -1,5 +1,6 @@
 public with sharing class AccountContactClass {
 	
+	//adding some comments
 	public AccountContactClass(){}
 	
 	public Map<String,Integer> getEmailCountsForEmails(Set<String> emails){
